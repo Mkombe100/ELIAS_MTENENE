@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>AgroFarm Dashboard</title>
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --dark: #073e49;
+      --dark-2: #052f38;
+      --green: #245b35;
+      --light-green: #c9f3d5;
+      --border: #e1eee5;
+      --bg: #f7fcf8;
+      --white: #ffffff;
+      --muted: #66806e;
+      --sidebar-text: #d6ece0;
+      --sidebar-muted: #9abda3;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--green);
+      transition: 0.25s ease;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    /* Main page layout */
+    .layout {
+      min-height: 100vh;
+      padding-left: 220px;
+      padding-top: 58px;
+      transition: padding-left 0.25s ease;
+    }
+
+    .layout.sidebar-closed {
+      padding-left: 0;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 100;
+      width: 220px;
+      background: var(--dark);
+      color: white;
+      transition: transform 0.25s ease;
+    }
+
+    .sidebar.closed {
+      transform: translateX(-100%);
+    }
+
+    .brand {
+      height: 58px;
+      padding: 0 16px;
+      background: var(--dark-2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .brand i {
+      color: var(--light-green);
+      font-size: 18px;
+    }
+
+    .brand small {
+      color: var(--sidebar-muted);
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .menu-title {
+      margin: 24px 15px 8px;
+      color: var(--sidebar-muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .nav-list {
+      list-style: none;
+    }
+
+    .nav-button {
+      width: 100%;
+      padding: 12px 15px;
+      border: none;
+      border-left: 3px solid transparent;
+      background: transparent;
+      color: var(--sidebar-text);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      font-size: 13px;
+      transition: 0.2s ease;
+    }
+
+    .nav-button i {
+      width: 17px;
+      color: var(--sidebar-muted);
+      text-align: center;
+    }
+
+    .nav-button:hover,
+    .nav-button.active {
+      border-left-color: var(--light-green);
+      background: rgba(201, 243, 213, 0.14);
+      color: white;
+    }
+
+    .nav-button:hover i,
+    .nav-button.active i {
+      color: var(--light-green);
+    }
+
+    /* Topbar */
+    .topbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 220px;
+      z-index: 90;
+      height: 58px;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: left 0.25s ease;
+    }
+
+    .topbar.sidebar-closed {
+      left: 0;
+    }
+
+    .topbar-left,
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .welcome {
+      font-size: 13px;
+      color: var(--green);
+    }
+
+    .welcome strong {
+      color: #d5674e;
+    }
+
+    .icon-button {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #f3fff6;
+      color: var(--green);
+      transition: 0.2s ease;
+    }
+
+    .icon-button:hover {
+      background: var(--light-green);
+      border-color: #8edaa3;
+    }
+
+    .mobile-button {
+      display: none;
+    }
+
+    /* Profile */
+    .profile-section {
+      position: relative;
+    }
+
+    .profile-button {
+      min-height: 35px;
+      padding: 4px 9px 4px 5px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: #f3fff6;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s ease;
+    }
+
+    .profile-button:hover {
+      border-color: #8edaa3;
+      background: var(--light-green);
+    }
+
+    .profile-avatar {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: var(--green);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .profile-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 200;
+      width: 270px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--white);
+      box-shadow: 0 12px 30px rgba(36, 91, 53, 0.16);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: 0.2s ease;
+    }
+
+    .profile-dropdown.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .profile-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .large-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: var(--green);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .profile-name {
+      color: var(--green);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .profile-email {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+
+    .profile-info {
+      padding: 14px 16px;
+    }
+
+    .profile-info p {
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .profile-info p:last-child {
+      margin-bottom: 0;
+    }
+
+    .profile-info strong {
+      color: var(--green);
+    }
+
+    .profile-actions {
+      padding: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .profile-action {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .profile-action:hover {
+      background: #f3fff6;
+    }
+
+    /* Content */
+    .main {
+      min-height: calc(100vh - 58px);
+    }
+
+    .banner {
+      min-height: 110px;
+      padding: 28px 42px;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(7, 62, 73, 0.95),
+          rgba(36, 91, 53, 0.75)
+        ),
+        linear-gradient(135deg, #0d4f3e, #9bd7aa);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .banner h1 {
+      font-size: 28px;
+      font-weight: 500;
+    }
+
+    .banner p {
+      margin-top: 7px;
+      color: #e0f5e5;
+      font-size: 13px;
+    }
+
+    .content {
+      max-width: 1200px;
+      margin: auto;
+      padding: 28px 42px 80px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .heading {
+      margin-bottom: 20px;
+    }
+
+    .heading h2 {
+      font-size: 21px;
+      color: var(--green);
+    }
+
+    .heading p {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Main dashboard functionality cards */
+    .function-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 16px;
+    }
+
+    .function-card {
+      min-height: 180px;
+      padding: 22px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: 0 4px 14px rgba(36, 91, 53, 0.05);
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .function-card:hover {
+      border-color: #8edaa3;
+      transform: translateY(-4px);
+      box-shadow: 0 10px 22px rgba(36, 91, 53, 0.12);
+    }
+
+    .function-card i {
+      margin-bottom: 17px;
+      color: var(--green);
+      font-size: 40px;
+    }
+
+    .function-card h3 {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .function-card p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* Other display sections */
+    .feature-card {
+      max-width: 700px;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--white);
+      box-shadow: 0 4px 14px rgba(36, 91, 53, 0.05);
+    }
+
+    .feature-card h2 {
+      color: var(--green);
+      font-size: 19px;
+    }
+
+    .feature-card h2 i {
+      margin-right: 7px;
+      color: #43be84;
+    }
+
+    .feature-card p {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    .footer {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 220px;
+      min-height: 52px;
+      padding: 0 28px;
+      border-top: 1px solid var(--border);
+      background: var(--white);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      transition: left 0.25s ease;
+    }
+
+    .footer.sidebar-closed {
+      left: 0;
+    }
+
+    .footer strong {
+      color: var(--green);
+    }
+
+    /* Tablet layout */
+    @media (max-width: 1100px) {
+      .function-grid {
+        grid-template-columns: repeat(3, minmax(150px, 1fr));
+      }
+    }
+
+    /* Mobile layout */
+    @media (max-width: 780px) {
+      .layout {
+        padding-left: 0;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        box-shadow: 10px 0 25px rgba(0, 0, 0, 0.2);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar.closed {
+        transform: translateX(-100%);
+      }
+
+      .topbar,
+      .topbar.sidebar-closed {
+        left: 0;
+      }
+
+      .footer,
+      .footer.sidebar-closed {
+        left: 0;
+      }
+
+      .mobile-button {
+        display: block;
+      }
+
+      .welcome {
+        display: none;
+      }
+
+      .banner {
+        padding: 24px 20px;
+      }
+
+      .content {
+        padding: 24px 20px 78px;
+      }
+
+      .function-grid {
+        grid-template-columns: repeat(2, minmax(135px, 1fr));
+      }
+
+      .footer {
+        padding: 0 15px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .function-grid {
+        gap: 10px;
+      }
+
+      .function-card {
+        min-height: 150px;
+        padding: 15px 8px;
+      }
+
+      .function-card i {
+        margin-bottom: 13px;
+        font-size: 33px;
+      }
+
+      .function-card h3 {
+        font-size: 10px;
+      }
+
+      .function-card p {
+        font-size: 10px;
+      }
+
+      .footer {
+        font-size: 10px;
+      }
+
+      .footer span:last-child {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <i class="fas fa-seedling"></i>
+      <span>AGROFARM</span>
+      <small>2.0</small>
+    </div>
+
+    <div class="menu-title">Main Menu</div>
+
+    <ul class="nav-list">
+      <li>
+        <button class="nav-button active" data-section="dashboard">
+          <i class="fas fa-gauge-high"></i>
+          <span>Dashboard</span>
+        </button>
+      </li>
+    </ul>
+
+    <div class="menu-title">Farm Services</div>
+
+    <ul class="nav-list">
+      <li>
+        <button class="nav-button" data-section="crops">
+          <i class="fas fa-wheat-awn"></i>
+          <span>Crop Management</span>
+        </button>
+      </li>
+
+      <li>
+        <button class="nav-button" data-section="livestock">
+          <i class="fas fa-cow"></i>
+          <span>Livestock</span>
+        </button>
+      </li>
+
+      <li>
+        <button class="nav-button" data-section="weather">
+          <i class="fas fa-cloud-sun-rain"></i>
+          <span>Weather & Alerts</span>
+        </button>
+      </li>
+
+      <li>
+        <button class="nav-button" data-section="market">
+          <i class="fas fa-store"></i>
+          <span>Marketplace</span>
+        </button>
+      </li>
+
+      <li>
+        <button class="nav-button" data-section="groups">
+          <i class="fas fa-users"></i>
+          <span>Farmer Groups</span>
+        </button>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Topbar -->
+  <header class="topbar" id="topbar">
+    <div class="topbar-left">
+
+      <!-- Appears on mobile -->
+      <button class="icon-button mobile-button" id="mobileButton" title="Menu">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <!-- Sidebar close/open button -->
+      <button class="icon-button" id="sidebarToggleButton" title="Toggle Sidebar">
+        <i class="fas fa-ellipsis-vertical"></i>
+      </button>
+
+      <p class="welcome">
+        Welcome,
+        <strong>
+          {{ user.first_name or "Farmer" }}
+          {{ user.last_name or "" }}
+        </strong>
+      </p>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-button" id="fullscreenButton" title="Fullscreen">
+        <i class="fas fa-expand"></i>
+      </button>
+
+      <div class="profile-section">
+        <button class="profile-button" id="profileButton">
+          <span class="profile-avatar" id="smallInitials">F</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+
+        <div class="profile-dropdown" id="profileDropdown">
+          <div class="profile-header">
+            <div class="large-avatar" id="largeInitials">F</div>
+
+            <div>
+              <div class="profile-name">
+                {{ user.first_name or "Farmer" }}
+                {{ user.last_name or "" }}
+              </div>
+
+              <div class="profile-email">
+                {{ user.email or "farmer@email.com" }}
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-info">
+            <p>
+              <strong><i class="fas fa-user"></i> Role:</strong>
+              Farmer
+            </p>
+
+            <p>
+              <strong><i class="fas fa-seedling"></i> System:</strong>
+              AgroFarm User
+            </p>
+          </div>
+
+          <div class="profile-actions">
+            <button class="profile-action" id="closeProfileButton">
+              <i class="fas fa-xmark"></i>
+              Close Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="layout" id="layout">
+    <main class="main">
+
+      <section class="banner">
+        <h1 id="pageTitle">Agriculture Dashboard</h1>
+        <p id="pageDescription">
+          Manage your essential farm services from one dashboard.
+        </p>
+      </section>
+
+      <div class="content">
+
+        <!-- Dashboard: Overview removed -->
+        <section class="section active" id="dashboard">
+          <div class="heading">
+            <h2>Farm Functionalities</h2>
+            <p>Select one of the agriculture services below.</p>
+          </div>
+
+          <div class="function-grid">
+            <article class="function-card" data-section="crops">
+              <i class="fas fa-wheat-awn"></i>
+              <h3>Crop Management</h3>
+              <p>Plan and monitor crop production.</p>
+            </article>
+
+            <article class="function-card" data-section="livestock">
+              <i class="fas fa-cow"></i>
+              <h3>Livestock</h3>
+              <p>View animal and livestock details.</p>
+            </article>
+
+            <article class="function-card" data-section="weather">
+              <i class="fas fa-cloud-sun-rain"></i>
+              <h3>Weather & Alerts</h3>
+              <p>View weather and farming alerts.</p>
+            </article>
+
+            <article class="function-card" data-section="market">
+              <i class="fas fa-store"></i>
+              <h3>Marketplace</h3>
+              <p>View farm products and inputs.</p>
+            </article>
+
+            <article class="function-card" data-section="groups">
+              <i class="fas fa-users"></i>
+              <h3>Farmer Groups</h3>
+              <p>View farming communities.</p>
+            </article>
+          </div>
+        </section>
+
+        <!-- Crop Management -->
+        <section class="section" id="crops">
+          <div class="heading">
+            <h2>Crop Management</h2>
+            <p>Plan and monitor crop production activities.</p>
+          </div>
+
+          <article class="feature-card">
+            <h2>
+              <i class="fas fa-wheat-awn"></i>
+              Crop Management
+            </h2>
+
+            <p>
+              This area displays crop planning, planting, crop monitoring,
+              farm activities, and harvest information.
+            </p>
+          </article>
+        </section>
+
+        <!-- Livestock -->
+        <section class="section" id="livestock">
+          <div class="heading">
+            <h2>Livestock</h2>
+            <p>View farm animal and livestock information.</p>
+          </div>
+
+          <article class="feature-card">
+            <h2>
+              <i class="fas fa-cow"></i>
+              Livestock Management
+            </h2>
+
+            <p>
+              This area displays livestock types, health details,
+              animal production, and livestock activities.
+            </p>
+          </article>
+        </section>
+
+        <!-- Weather -->
+        <section class="section" id="weather">
+          <div class="heading">
+            <h2>Weather & Alerts</h2>
+            <p>View weather information for farm planning.</p>
+          </div>
+
+          <article class="feature-card">
+            <h2>
+              <i class="fas fa-cloud-sun-rain"></i>
+              Weather Information
+            </h2>
+
+            <p>
+              This area can display rainfall, temperature, humidity,
+              wind conditions, and agricultural weather alerts.
+            </p>
+          </article>
+        </section>
+
+        <!-- Marketplace -->
+        <section class="section" id="market">
+          <div class="heading">
+            <h2>Marketplace</h2>
+            <p>View farm products and agricultural inputs.</p>
+          </div>
+
+          <article class="feature-card">
+            <h2>
+              <i class="fas fa-store"></i>
+              Farm Marketplace
+            </h2>
+
+            <p>
+              This area can display farm produce, seeds, fertilizer,
+              equipment, livestock, and agricultural market information.
+            </p>
+          </article>
+        </section>
+
+        <!-- Farmer Groups -->
+        <section class="section" id="groups">
+          <div class="heading">
+            <h2>Farmer Groups</h2>
+            <p>View farmer communities and cooperatives.</p>
+          </div>
+
+          <article class="feature-card">
+            <h2>
+              <i class="fas fa-users"></i>
+              Farmer Communities
+            </h2>
+
+            <p>
+              This area can display farmer groups, cooperatives,
+              associations, and agricultural communities.
+            </p>
+          </article>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer" id="footer">
+    <span><strong>AgroFarm System</strong> © 2026</span>
+    <span>Smart Agriculture for Better Farming</span>
+  </footer>
+
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    const layout = document.getElementById("layout");
+    const topbar = document.getElementById("topbar");
+    const footer = document.getElementById("footer");
+
+    const profileButton = document.getElementById("profileButton");
+    const profileDropdown = document.getElementById("profileDropdown");
+
+    const pageTitle = document.getElementById("pageTitle");
+    const pageDescription = document.getElementById("pageDescription");
+
+    const userFirstName = {{ (user.first_name or "Farmer")|tojson }};
+    const userLastName = {{ (user.last_name or "")|tojson }};
+
+    const descriptions = {
+      dashboard: "Manage your essential farm services from one dashboard.",
+      crops: "Plan and monitor crop production activities.",
+      livestock: "View farm animals and livestock information.",
+      weather: "View weather information and agriculture alerts.",
+      market: "View agricultural products and farm inputs.",
+      groups: "View farmer groups and farming communities."
+    };
+
+    function getInitials() {
+      const first = userFirstName.trim().charAt(0);
+      const last = userLastName.trim().charAt(0);
+
+      return (first + last || "F").toUpperCase();
+    }
+
+    document.getElementById("smallInitials").textContent = getInitials();
+    document.getElementById("largeInitials").textContent = getInitials();
+
+    function showSection(sectionName) {
+      document.querySelectorAll(".section").forEach(section => {
+        section.classList.toggle("active", section.id === sectionName);
+      });
+
+      document.querySelectorAll(".nav-button").forEach(button => {
+        button.classList.toggle(
+          "active",
+          button.dataset.section === sectionName
+        );
+      });
+
+      const selectedButton = document.querySelector(
+        `.nav-button[data-section="${sectionName}"]`
+      );
+
+      pageTitle.textContent = selectedButton
+        ? selectedButton.querySelector("span").textContent
+        : "Agriculture Dashboard";
+
+      pageDescription.textContent = descriptions[sectionName];
+
+      if (window.innerWidth <= 780) {
+        sidebar.classList.remove("open");
+      }
+
+      closeProfileMenu();
+    }
+
+    function toggleDesktopSidebar() {
+      const isClosed = sidebar.classList.toggle("closed");
+
+      layout.classList.toggle("sidebar-closed", isClosed);
+      topbar.classList.toggle("sidebar-closed", isClosed);
+      footer.classList.toggle("sidebar-closed", isClosed);
+    }
+
+    function closeProfileMenu() {
+      profileDropdown.classList.remove("show");
+    }
+
+    document.querySelectorAll(".nav-button").forEach(button => {
+      button.addEventListener("click", () => {
+        showSection(button.dataset.section);
+      });
+    });
+
+    document.querySelectorAll(".function-card").forEach(card => {
+      card.addEventListener("click", () => {
+        showSection(card.dataset.section);
+      });
+    });
+
+    /* Three-dot button: click once close sidebar, click again open sidebar */
+    document
+      .getElementById("sidebarToggleButton")
+      .addEventListener("click", toggleDesktopSidebar);
+
+    /* Mobile sidebar button */
+    document.getElementById("mobileButton").addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+    });
+
+    /* Profile dropdown */
+    profileButton.addEventListener("click", event => {
+      event.stopPropagation();
+      profileDropdown.classList.toggle("show");
+    });
+
+    document
+      .getElementById("closeProfileButton")
+      .addEventListener("click", closeProfileMenu);
+
+    document.addEventListener("click", event => {
+      if (!event.target.closest(".profile-section")) {
+        closeProfileMenu();
+      }
+    });
+
+    /* Fullscreen button */
+    document.getElementById("fullscreenButton").addEventListener("click", async () => {
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+        } else {
+          await document.exitFullscreen();
+        }
+      } catch (error) {
+        console.log("Fullscreen is not available in this browser.");
+      }
+    });
+
+    document.addEventListener("fullscreenchange", () => {
+      const icon = document.querySelector("#fullscreenButton i");
+
+      icon.className = document.fullscreenElement
+        ? "fas fa-compress"
+        : "fas fa-expand";
+    });
+
+    /* Reset desktop sidebar state if user changes screen size */
+    window.addEventListener("resize", () => {
+      if (window.innerWidth <= 780) {
+        layout.classList.remove("sidebar-closed");
+        topbar.classList.remove("sidebar-closed");
+        footer.classList.remove("sidebar-closed");
+        sidebar.classList.remove("closed");
+      }
+    });
+  </script>
+
+</body>
+</html>
