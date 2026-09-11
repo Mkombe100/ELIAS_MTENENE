@@ -77,7 +77,7 @@ def send_verification_email(to_email: str, first_name: str, code: str):
     msg["Subject"] = subject
     msg.attach(MIMEText(html_content, "html"))
 
-    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+    with smtplib.SMTP("smtp.gmail.com", 587, timeout=20) as server:
         server.starttls()
         server.login(EMAIL_USER, EMAIL_PASS)
         server.send_message(msg)
